@@ -15,7 +15,6 @@ public class MainActivity extends Activity {
     private static final String TAG = "BroadcastTest";
     Intent _intent;
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

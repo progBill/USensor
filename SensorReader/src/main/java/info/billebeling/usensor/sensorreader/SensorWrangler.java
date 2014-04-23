@@ -8,20 +8,14 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.sensorcon.sensordrone.android.Drone;
-
 import java.sql.SQLException;
+import java.util.Date;
 
+import info.billebeling.usensor.data.DataPoint;
 import info.billebeling.usensor.data.SensorObj;
 import info.billebeling.usensor.db.SensorBaseQueries;
-import info.billebeling.usensor.ui.sensorUI;
 
 
-/**
- * Created by Torres James E on 4/14/2014.
- * SensorWrangler is the Controller class.
- *
- *
- */
 public class SensorWrangler extends Service{
     private SensorObj[] _sensorArray;
     private static final String TAG = "BroadcastService";
@@ -30,6 +24,7 @@ public class SensorWrangler extends Service{
     private String _name;
     private float _data;
     private Intent _intent;
+    private SensorBaseQueries _db;
 
     @Override
     public void onCreate(){
@@ -38,8 +33,7 @@ public class SensorWrangler extends Service{
         Toast.makeText(this, "SW Created", Toast.LENGTH_LONG).show();
         _intent = new Intent(BROADCAST_ACTION);
         Drone aDrone = connect();
-        SensorBaseQueries _db = new SensorBaseQueries(getBaseContext());
-
+        _db = new SensorBaseQueries(getBaseContext());
         try {
             _db.open();
         } catch (SQLException e) {
@@ -73,6 +67,7 @@ public class SensorWrangler extends Service{
     public void onDestroy(){
         super.onDestroy();
         Toast.makeText(this, "SW Destroyed", Toast.LENGTH_LONG).show();
+        _db.close();
     }
 
     public Drone connect() {
@@ -106,11 +101,15 @@ public class SensorWrangler extends Service{
 
     public void pollSensor(){
 
+        int sID = 0;
         for(SensorObj s : _sensorArray){
             _name = s.getName();
             _data = s.getData();
-
+            sID = s.getID();
         }
+
+        String date = new Date().toString();
+        _db.takeData(new DataPoint(sID, String.valueOf(_data), date));
 
         Log.d(String.format("SW: pollS: %s --", _name), String.valueOf(_data));
 
