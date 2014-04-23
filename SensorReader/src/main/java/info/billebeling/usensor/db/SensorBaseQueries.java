@@ -104,7 +104,8 @@ public class SensorBaseQueries implements DataConsumer{
                 sortOrder       //ORDER BY
         );
 
-        SensorObj[] sensors = new SensorObj[c.getCount()];
+        SensorObj[] sensors;
+        sensors = new SensorObj[c.getCount()];
 
         Log.d("SBQ has this many sensors: ", String.valueOf(c.getCount()));
 
@@ -247,8 +248,26 @@ public class SensorBaseQueries implements DataConsumer{
         }
     }
 
-    private boolean sensorExists(SensorObj sensor){
-        return false;
+    private boolean sensorExists(SensorObj snsr){
+        String[] projection = {SensorBase.COLUMN_NAME_TITLE};
+
+        String whereCol =
+                SensorBase.COLUMN_NAME_ID + "=? AND " +
+                        SensorBase.COLUMN_NAME_TITLE + "=? ";
+
+        String[] whereVals = {String.valueOf(snsr.getID()), snsr.getName()};
+
+        Cursor c = _db.query(
+                SensorBase.TABLE_NAME,
+                projection,             //return columns
+                whereCol, whereVals,    //WHERE cols, vals
+                null, null,             //GROUP BY cols, vals
+                null                    //ORDER BY
+        );
+
+        Log.d("SBQ  exists row count:", String.valueOf(c.getCount()));
+
+        return c.getCount() > 0;
     }
 
     public void saveSensor(SensorObj sensor){
