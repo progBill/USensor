@@ -1,6 +1,11 @@
 package info.billebeling.usensor.sensorreader;
 
+import android.app.Service;
+import android.content.Intent;
+import android.os.Handler;
+import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.sensorcon.sensordrone.android.Drone;
 
@@ -17,64 +22,107 @@ import info.billebeling.usensor.ui.sensorUI;
  *
  *
  */
-public class SensorWrangler {
+public class SensorWrangler extends Service{
     private SensorObj[] _sensorArray;
-    private SensorBaseQueries _db;
-    private sensorUI _ui;
+    private static final String TAG = "BroadcastService";
+    public static final String BROADCAST_ACTION = "info.billebeling.usensor.displayevent";
+    private final Handler handler = new Handler();
+    private String _name;
+    private float _data;
+    private Intent _intent;
 
-    public SensorWrangler(MainActivity aContext, Drone aDrone){
-        _db = new SensorBaseQueries(aContext);
-        _ui = new sensorUI(aContext);
+    @Override
+    public void onCreate(){
+        super.onCreate();
+
+        Toast.makeText(this, "SW Created", Toast.LENGTH_LONG).show();
+        _intent = new Intent(BROADCAST_ACTION);
+        Drone aDrone = connect();
+        SensorBaseQueries _db = new SensorBaseQueries(getBaseContext());
 
         try {
             _db.open();
         } catch (SQLException e) {
-            Log.d("DB ERROR", "Couldn't open a DB");
+            Log.d("DB ERROR", e.toString());
         }
-        SensorObj s = new SensorObj("TempF", 0 , aDrone);
+
+        //TODO: move this sensor creation code to database oncreate
+        SensorObj s;
+        s = new SensorObj("TempF", 0 , aDrone);
         _db.takeSensor(s);
+
         _sensorArray = _db.getSensors(aDrone);
 
         Log.d("SW sensorArray has this many: ", String.valueOf(_sensorArray.length));
 
-        this.PollSensor();
     }
 
-
-    public void PollSensor(){
-        //DataPoint aDataPoint;
-        String SensorName = "";
-        float SensorValue = 0;
-
-        for(SensorObj aSensor : _sensorArray){
-
-           Log.d("SensorWrangler:", String.valueOf(_sensorArray));
-           SensorName = aSensor.getName();
-           SensorValue = aSensor.getData();
-           Log.d("SensorWrangler:", "Done polling.");
-
-           // aDataPoint = aSensor.takeMeasurement(); // takeMeasurement not yet created but will return data point.
-           // _db.saveData(aDataPoint.get_sID(), aDataPoint.getData());
-        }
-
-        String tTxt;
-
-
-        while (true) {
-            sleep(5000);
-            tTxt = String.format("%f", _sensorArray[0].getData());
-            Log.d("SW, Temp F is:", tTxt);
-            //_ui.setTemp(tTxt);
-        }
+    public int onStartCommand(Intent intent, int flags, int startId){
+        Toast.makeText(this, "SW Started", Toast.LENGTH_LONG).show();
+        handler.removeCallbacks(sendUpdatesToUI);
+        handler.postDelayed(sendUpdatesToUI, 1000); // 1 second
+        return START_STICKY;
     }
 
-    public static void sleep(int amt) // In milliseconds
-    {
-        long a = System.currentTimeMillis();
-        long b = System.currentTimeMillis();
-        while ((b - a) <= amt)
-        {
-            b = System.currentTimeMillis();
-        }
+    @Override
+    public IBinder onBind(Intent i) {
+        return null;
     }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        Toast.makeText(this, "SW Destroyed", Toast.LENGTH_LONG).show();
+    }
+
+    public Drone connect() {
+        Drone d = new Drone();
+
+        boolean isConn = false;
+
+        while (!isConn) {
+
+            isConn = d.btConnect("00:17:E9:50:EB:F6");
+            d.enableTemperature();
+            d.measureTemperature();
+            Log.d("Temp F is:", String.valueOf(d.temperature_Fahrenheit));
+
+            if (isConn) {
+                Log.d("sensorDrone", "Connected");
+            } else {
+                Log.d("SensorDrone", "Not Connected");
+            }
+        }
+        return d;
+
+    }
+
+    private Runnable sendUpdatesToUI = new Runnable() {
+        public void run() {
+            DisplayLoggingInfo();
+            handler.postDelayed(this, 1000); // 1c seconds
+        }
+    };
+
+    public void pollSensor(){
+
+        for(SensorObj s : _sensorArray){
+            _name = s.getName();
+            _data = s.getData();
+
+        }
+
+        Log.d(String.format("SW: pollS: %s --", _name), String.valueOf(_data));
+
+    }
+
+    private void DisplayLoggingInfo() {
+        Log.d(TAG, "entered DisplayLoggingInfo");
+
+        pollSensor();
+        _intent.putExtra("name", _name);
+        _intent.putExtra("data", String.valueOf(_data));
+        sendBroadcast(_intent);
+    }
+
 }

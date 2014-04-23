@@ -19,7 +19,6 @@ public class SensorObj {
     private Drone _aDrone;
     DataPoint[] _dataPointsF;
 
-
   //Needs to have a Drone object as the parameter
      public SensorObj(String name, int id, Drone aDrone) {
 
