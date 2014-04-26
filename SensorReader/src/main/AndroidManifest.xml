@@ -3,21 +3,27 @@
     package="info.billebeling.usensor.sensorreader" >
 
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.BLUETOOTH" />﻿
-
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+﻿
     <application
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".MainActivity"
+            android:name="info.billebeling.usensor.sensorreader.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".SensorWrangler" />
+        <activity
+            android:name="info.billebeling.usensor.sensorreader.DetailsActivity"
+            android:label="@string/title_activity_details"
+            android:parentActivityName="info.billebeling.usensor.sensorreader.MainActivity" >
+        </activity>
+        <service android:name="info.billebeling.usensor.sensorreader.SensorWrangler" />
+
     </application>
 
 </manifest>

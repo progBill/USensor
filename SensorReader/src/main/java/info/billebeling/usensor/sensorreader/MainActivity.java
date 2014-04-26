@@ -9,11 +9,20 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 public class MainActivity extends Activity {
-    private static final String TAG = "BroadcastTest";
     Intent _intent;
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateUI(intent);
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -24,12 +33,6 @@ public class MainActivity extends Activity {
         _intent = new Intent(this, SensorWrangler.class);
     }
 
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            updateUI(intent);
-        }
-    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -42,34 +45,35 @@ public class MainActivity extends Activity {
         startService(new Intent(getBaseContext(), SensorWrangler.class));
     }
 
-    public void stopService(View v){
-        stopService(new Intent(getBaseContext(), SensorWrangler.class));
-    }
-
     public void onResume(){
         super.onResume();
-        startService(_intent);
         registerReceiver(broadcastReceiver, new IntentFilter(SensorWrangler.BROADCAST_ACTION));
     }
+
     @Override
     public void onPause() {
         super.onPause();
         unregisterReceiver(broadcastReceiver);
-        stopService(_intent);
     }
 
     public void updateUI(Intent i){
 
         String name = i.getStringExtra("name");
-        String data = i.getStringExtra("data");
-        String out = String.format("%s\t%s", name, data);
-        Log.d("MA updateUI", out);
-        TextView t = (TextView) findViewById(R.id.text_out);
+        String out = String.format("%s", name);
+        Button b = (Button) findViewById(R.id.details);
 
-        if (!(name==null)) {
-            Log.d(TAG, name);
-            Log.d(TAG, String.valueOf(data));
-        }
-        t.setText(out);
+        b.setText(out);
+
+    }
+
+    public void toDetailScreen(View v){
+        Intent i = new Intent(this, DetailsActivity.class);
+        startActivity(i);
+    }
+
+    private Button makeButton(String title){
+        Button b = new Button(this);
+        b.setText(title);
+        return b;
     }
 }

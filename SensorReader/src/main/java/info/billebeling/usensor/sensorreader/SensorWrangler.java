@@ -5,10 +5,13 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.sensorcon.sensordrone.android.Drone;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 
 import info.billebeling.usensor.data.DataPoint;
@@ -18,7 +21,8 @@ import info.billebeling.usensor.db.SensorBaseQueries;
 
 public class SensorWrangler extends Service{
     private SensorObj[] _sensorArray;
-    private static final String TAG = "BroadcastService";
+    private static final String TAG = "Broadcast";
+    //uri where intent will be..  I think
     public static final String BROADCAST_ACTION = "info.billebeling.usensor.displayevent";
     private final Handler handler = new Handler();
     private String _name;
@@ -42,7 +46,7 @@ public class SensorWrangler extends Service{
 
         //TODO: move this sensor creation code to database oncreate
         SensorObj s;
-        s = new SensorObj("TempF", 0 , aDrone);
+        s = new SensorObj("Temperature", 0 , aDrone);
         _db.takeSensor(s);
 
         _sensorArray = _db.getSensors(aDrone);
@@ -52,9 +56,8 @@ public class SensorWrangler extends Service{
     }
 
     public int onStartCommand(Intent intent, int flags, int startId){
-        Toast.makeText(this, "SW Started", Toast.LENGTH_LONG).show();
         handler.removeCallbacks(sendUpdatesToUI);
-        handler.postDelayed(sendUpdatesToUI, 1000); // 1 second
+        handler.postDelayed(sendUpdatesToUI, 5000); // 5 second
         return START_STICKY;
     }
 
@@ -95,7 +98,7 @@ public class SensorWrangler extends Service{
     private Runnable sendUpdatesToUI = new Runnable() {
         public void run() {
             DisplayLoggingInfo();
-            handler.postDelayed(this, 1000); // 1c seconds
+            handler.postDelayed(this, 5000); // 5 seconds
         }
     };
 
