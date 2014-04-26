@@ -5,19 +5,13 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.Toast;
-
 import com.sensorcon.sensordrone.android.Drone;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Date;
-
 import info.billebeling.usensor.data.DataPoint;
 import info.billebeling.usensor.data.SensorObj;
 import info.billebeling.usensor.db.SensorBaseQueries;
-
 
 public class SensorWrangler extends Service{
     private SensorObj[] _sensorArray;

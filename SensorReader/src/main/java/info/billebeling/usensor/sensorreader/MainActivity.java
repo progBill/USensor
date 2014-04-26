@@ -10,10 +10,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-
-import java.util.ArrayList;
 
 public class MainActivity extends Activity {
     Intent _intent;
