@@ -9,22 +9,17 @@ import android.util.Log;
 import android.widget.Toast;
 import com.sensorcon.sensordrone.android.Drone;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
 import info.billebeling.usensor.data.DataPoint;
 import info.billebeling.usensor.data.Sensible;
-import info.billebeling.usensor.data.SensorObj;
+import info.billebeling.usensor.data.Temperature;
 import info.billebeling.usensor.db.SensorBaseQueries;
 
 public class SensorWrangler extends Service{
-    private SensorObj[] _sensorArray;
+    private Sensible[] _sensorArray;
     private Bundle _sensorData;
     private static final String TAG = "Broadcast";
     //uri where intent will be..  I think
@@ -51,8 +46,8 @@ public class SensorWrangler extends Service{
         }
 
         //TODO: move this sensor creation code to database oncreate
-        SensorObj s;
-        s = new SensorObj("Temperature", 0 , aDrone);
+        Temperature s;
+        s = new Temperature("Temperature", 0 , aDrone);
         _db.takeSensor(s);
 
 
@@ -115,7 +110,7 @@ public class SensorWrangler extends Service{
 
         int sID = 0;
         HashMap sensorNames = new HashMap();
-        for(SensorObj s : _sensorArray){
+        for(Sensible s : _sensorArray){
             date = new Date().toString();
             _name = s.getName();
             _data = s.takeMeasurement();

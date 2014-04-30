@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
+import android.view.textservice.SentenceSuggestionsInfo;
 
 import com.sensorcon.sensordrone.android.Drone;
 
@@ -17,8 +18,10 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import info.billebeling.usensor.data.DataPoint;
-import info.billebeling.usensor.data.SensorObj;
+import info.billebeling.usensor.data.Sensible;
+import info.billebeling.usensor.data.Temperature;
 import info.billebeling.usensor.db.SensorBaseContract.SensorBase;
+import info.billebeling.usensor.sensorreader.SensorWrangler;
 
 public class SensorBaseQueries implements DataConsumer{
     private SensorBaseHelper _sbHelper;
@@ -86,7 +89,7 @@ public class SensorBaseQueries implements DataConsumer{
      * Returns an array of sensor's names
      * @return
      */
-    public SensorObj[] getSensors(Drone d){
+    public Sensible[] getSensors(Drone d){
         Log.d("SensorBase: ", "getting Sensors");
 
         String[] projection = {
@@ -103,15 +106,15 @@ public class SensorBaseQueries implements DataConsumer{
                 sortOrder       //ORDER BY
         );
 
-        SensorObj[] sensors;
-        sensors = new SensorObj[c.getCount()];
+        Sensible[] sensors;
+        sensors = new Temperature[c.getCount()];
 
         Log.d("SBQ has this many sensors: ", String.valueOf(c.getCount()));
 
         c.moveToFirst();
         int i = 0;
         while(!c.isAfterLast()){
-            sensors[i] = new SensorObj(c.getString(1), Integer.parseInt(c.getString(0)), d);
+            sensors[i] = new Temperature(c.getString(1), Integer.parseInt(c.getString(0)), d);
             c.moveToNext();
             i++;
         }
@@ -191,7 +194,7 @@ public class SensorBaseQueries implements DataConsumer{
     //////////////////
     //save DataPoint//
     //////////////////
-    @Override
+
     public void takeData(DataPoint dp) {
         if(!this.dataPointExists(dp)){
             this.saveData(dp);
@@ -241,13 +244,13 @@ public class SensorBaseQueries implements DataConsumer{
     //Save Sensors//
     ////////////////
     @Override
-    public void takeSensor(SensorObj sensor) {
+    public void takeSensor(Sensible sensor) {
         if(!this.sensorExists(sensor)){
             this.saveSensor(sensor);
         }
     }
 
-    private boolean sensorExists(SensorObj snsr){
+    private boolean sensorExists(Sensible snsr){
         String[] projection = {SensorBase.COLUMN_NAME_TITLE};
 
         String whereCol =
@@ -269,7 +272,7 @@ public class SensorBaseQueries implements DataConsumer{
         return c.getCount() > 0;
     }
 
-    public void saveSensor(SensorObj sensor){
+    public void saveSensor(Sensible sensor){
         Log.d("SensorBase: ","Saving");
         ContentValues values = new ContentValues();
         values.put(SensorBase.COLUMN_NAME_TITLE, sensor.getName());
