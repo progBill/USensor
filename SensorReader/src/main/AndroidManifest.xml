@@ -9,6 +9,7 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+
         <activity
             android:name="info.billebeling.usensor.sensorreader.MainActivity"
             android:label="@string/app_name" >
@@ -17,9 +18,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name="info.billebeling.usensor.sensorreader.DetailsActivity"
-            android:label="@string/title_activity_details"
+            android:label="@string/app_name"
             android:parentActivityName="info.billebeling.usensor.sensorreader.MainActivity" >
         </activity>
         <service android:name="info.billebeling.usensor.sensorreader.SensorWrangler" />

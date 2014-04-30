@@ -3,11 +3,14 @@ package info.billebeling.usensor.data;
 
 import android.util.Log;
 
-public class DataPoint {
+import java.io.Serializable;
+
+public class DataPoint implements Serializable {
 
     private int _sID;
     private String _date;
     private String _data;
+    private static final long serialVersionUID = 1L;
 
     public DataPoint(int sID, String data, String date){
 

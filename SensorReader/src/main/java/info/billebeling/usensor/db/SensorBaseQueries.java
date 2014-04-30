@@ -16,10 +16,9 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import info.billebeling.usensor.data.DataPoint;
 import info.billebeling.usensor.data.SensorObj;
 import info.billebeling.usensor.db.SensorBaseContract.SensorBase;
-import info.billebeling.usensor.data.DataConsumer;
-import info.billebeling.usensor.data.DataPoint;
 
 public class SensorBaseQueries implements DataConsumer{
     private SensorBaseHelper _sbHelper;
@@ -77,7 +76,7 @@ public class SensorBaseQueries implements DataConsumer{
     public void saveSensor(String s){
         Log.d("SensorBase: ","Saving");
         ContentValues values = new ContentValues();
-        values.put(SensorBase.COLUMN_NAME_TITLE, s);
+        //values.put(SensorBase.COLUMN_NAME_TITLE, s);
         values.put(SensorBase.COLUMN_NAME_TITLE, s);
         long newRowID = _db.insert(SensorBase.TABLE_NAME, null, values);
         Log.d("SensorBase new Row id: ", String.valueOf(newRowID));

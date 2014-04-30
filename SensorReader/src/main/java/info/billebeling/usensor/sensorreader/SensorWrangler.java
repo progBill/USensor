@@ -2,19 +2,30 @@ package info.billebeling.usensor.sensorreader;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 import com.sensorcon.sensordrone.android.Drone;
+
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+
 import info.billebeling.usensor.data.DataPoint;
+import info.billebeling.usensor.data.Sensible;
 import info.billebeling.usensor.data.SensorObj;
 import info.billebeling.usensor.db.SensorBaseQueries;
 
 public class SensorWrangler extends Service{
     private SensorObj[] _sensorArray;
+    private Bundle _sensorData;
     private static final String TAG = "Broadcast";
     //uri where intent will be..  I think
     public static final String BROADCAST_ACTION = "info.billebeling.usensor.displayevent";
@@ -30,6 +41,7 @@ public class SensorWrangler extends Service{
 
         Toast.makeText(this, "SW Created", Toast.LENGTH_LONG).show();
         _intent = new Intent(BROADCAST_ACTION);
+        _sensorData = new Bundle();
         Drone aDrone = connect();
         _db = new SensorBaseQueries(getBaseContext());
         try {
@@ -42,6 +54,8 @@ public class SensorWrangler extends Service{
         SensorObj s;
         s = new SensorObj("Temperature", 0 , aDrone);
         _db.takeSensor(s);
+
+
 
         _sensorArray = _db.getSensors(aDrone);
 
@@ -97,17 +111,22 @@ public class SensorWrangler extends Service{
     };
 
     public void pollSensor(){
+        String date = new Date().toString();
 
         int sID = 0;
+        HashMap sensorNames = new HashMap();
         for(SensorObj s : _sensorArray){
+            date = new Date().toString();
             _name = s.getName();
-            _data = s.getData();
+            _data = s.takeMeasurement();
             sID = s.getID();
+
+            sensorNames.put(sID, _name);
         }
 
-        String date = new Date().toString();
+        _sensorData.putSerializable("names", sensorNames);
+        //_sensorData.putSerializable("datas", sensorData);
         _db.takeData(new DataPoint(sID, String.valueOf(_data), date));
-
         Log.d(String.format("SW: pollS: %s --", _name), String.valueOf(_data));
 
     }
@@ -116,9 +135,11 @@ public class SensorWrangler extends Service{
         Log.d(TAG, "entered DisplayLoggingInfo");
 
         pollSensor();
-        _intent.putExtra("name", _name);
-        _intent.putExtra("data", String.valueOf(_data));
+        _sensorData.putString("name", _name);
+        _sensorData.putString("data", String.valueOf(_data));
+        _intent.putExtras(_sensorData);
         sendBroadcast(_intent);
     }
+
 
 }

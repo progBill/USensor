@@ -7,17 +7,18 @@ package info.billebeling.usensor.data;
 
 import com.sensorcon.sensordrone.android.Drone;
 import android.util.Log;
-
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class SensorObj {
+public class SensorObj implements Sensible, Serializable{
 
     private String _name;
     private int _id;
     private Drone _aDrone;
     DataPoint[] _dataPointsF;
+    private static final long serialVersionUID = 1L;
 
   //Needs to have a Drone object as the parameter
      public SensorObj(String name, int id, Drone aDrone) {
@@ -27,7 +28,7 @@ public class SensorObj {
         _aDrone =  aDrone;
         Log.d("New Sensor: ", _name);
 
-        turnOnTemp();
+        turnOn();
         }
 
     public String getName() {
@@ -39,15 +40,15 @@ public class SensorObj {
     }
 
     //Get the temperature in three measurements (F, C, and K), but only returns F
-    public float getData() {
+    public float takeMeasurement() {
         _aDrone.measureTemperature();
         Log.d("Reading Temperature", "");
         return _aDrone.temperature_Fahrenheit;
-
     }
 
+
     //Turns off the Temperature Sensor
-    public boolean turnOffTemp() {
+    public boolean turnOff() {
         boolean tempStatus;
         tempStatus = _aDrone.disableTemperature();
         if (tempStatus = true) {
@@ -60,7 +61,7 @@ public class SensorObj {
     }
 
     //Turns on the temperature sensor
-    public boolean turnOnTemp() {
+    public boolean turnOn() {
         _aDrone.setLeftLED(0,0,255);
         _aDrone.setRightLED(0,0,255);
         sleep(2000);
@@ -79,7 +80,7 @@ public class SensorObj {
     }
 
     //Checks if the temperature sensor is on or off
-    public boolean statusOfTemp() {
+    public boolean statusOf() {
         boolean onOrOff;
         onOrOff = _aDrone.temperatureStatus;
         if (onOrOff = true) {
@@ -91,7 +92,7 @@ public class SensorObj {
         }
     }
 
-    public DataPoint getMostRecentF(int sID, String data, String date) {
+    public DataPoint getLastReading(int sID, String data, String date) {
         data = String.valueOf(_aDrone.temperature_Fahrenheit);
         Log.d("Datapoint:", "Being created");
         return new DataPoint(this._id, String.valueOf(data), date);
@@ -99,7 +100,7 @@ public class SensorObj {
     }
 
     // Saves a datapoint into the array
-    public DataPoint[] saveDataPoint(int sID, String data, String date) {
+    public DataPoint[] getDataPoints(int sID, String data, String date) {
         int _arraySize = 30;
         int pointer = 0;
         Log.d("Saving:","DataPoints being saved to an array");
@@ -117,7 +118,7 @@ public class SensorObj {
                 }
             }
             else{
-                _dataPointsF[i] = new DataPoint(this._id, String.valueOf(this.getData()), date);
+                _dataPointsF[i] = new DataPoint(this._id, String.valueOf(this.takeMeasurement()), date);
                 position++;
 
             }
@@ -135,6 +136,7 @@ public class SensorObj {
     }
 
 }
+
 
 
 
