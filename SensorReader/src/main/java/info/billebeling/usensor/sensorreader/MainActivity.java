@@ -79,37 +79,34 @@ public class MainActivity extends Activity {
             while (iter.hasNext()) {
                 Map.Entry me = (Map.Entry) iter.next();
                 String name = (String) me.getValue();
-                String id = "0"; //(String) me.getKey();
-                Button newButton = this.makeButton(name, id);
+                String id = (String) me.getKey();
+                iter.remove();
 
+                Button newButton = this.makeButton(name,id);
                 lo.addView(newButton);
-
                 Log.d("new sensor received!", id + ":" + name);
             }
 
             Log.d("sensorNames length", String.valueOf(sensorNames.size()));
             _gotSensors = true;
         }
-        //String name = i.getStringExtra("name");
-        //String out = String.format("%s", name);
-        //Button btn = (Button) findViewById(R.id.details);
-
-        //btn.setText(out);
-
     }
 
-    public void toDetailScreen(View v) {
+    public void toDetailScreen(View v, String id) {
         Intent i = new Intent(this, DetailsActivity.class);
+
+        Log.d("MA id to Deets:", id);
+
+        i.putExtra("id", id);
         startActivity(i);
     }
 
-    private Button makeButton(String title, String id) {
+    private Button makeButton(String title, final String id) {
         final Button b = new Button(this);
         b.setText(title);
-        b.setTag(id);
         b.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                toDetailScreen(b);
+                toDetailScreen(b, id);
             }
         });
         return b;

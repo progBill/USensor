@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import info.billebeling.usensor.data.Barometer;
 import info.billebeling.usensor.data.DataPoint;
 import info.billebeling.usensor.data.Sensible;
 import info.billebeling.usensor.data.Temperature;
@@ -107,14 +108,25 @@ public class SensorBaseQueries implements DataConsumer{
         );
 
         Sensible[] sensors;
-        sensors = new Temperature[c.getCount()];
+
+        sensors = new Sensible[c.getCount()];
 
         Log.d("SBQ has this many sensors: ", String.valueOf(c.getCount()));
 
         c.moveToFirst();
         int i = 0;
         while(!c.isAfterLast()){
-            sensors[i] = new Temperature(c.getString(1), Integer.parseInt(c.getString(0)), d);
+            Log.d("SBQ cursorname", c.getString(1));
+            //TODO: test cursor, make correct object
+            if(c.getString(1).equals("Temperature")) {
+                sensors[i] = new Temperature(c.getString(1), Integer.parseInt(c.getString(0)), d);
+                Log.d("New Temperature in array",String.valueOf(sensors[i]==null));
+            } else if(c.getString(1).equals("Barometer")){
+                sensors[i] = new Barometer(c.getString(1), Integer.parseInt(c.getString(0)), d);
+                Log.d("New Barometer in array",String.valueOf(sensors[i]==null));
+            }
+
+
             c.moveToNext();
             i++;
         }

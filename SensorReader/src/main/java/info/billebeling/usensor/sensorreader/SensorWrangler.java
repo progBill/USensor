@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 
+import info.billebeling.usensor.data.Barometer;
 import info.billebeling.usensor.data.DataPoint;
 import info.billebeling.usensor.data.Sensible;
 import info.billebeling.usensor.data.Temperature;
@@ -25,7 +26,7 @@ public class SensorWrangler extends Service{
     //uri where intent will be..  I think
     public static final String BROADCAST_ACTION = "info.billebeling.usensor.displayevent";
     private final Handler handler = new Handler();
-    private String _name;
+    public String  _name;
     private float _data;
     private Intent _intent;
     private SensorBaseQueries _db;
@@ -46,13 +47,19 @@ public class SensorWrangler extends Service{
         }
 
         //TODO: move this sensor creation code to database oncreate
-        Temperature s;
-        s = new Temperature("Temperature", 0 , aDrone);
-        _db.takeSensor(s);
+        Temperature t;
+        t = new Temperature("Temperature", 0 , aDrone);
+        _db.takeSensor(t);
+
+        Barometer b;
+        b = new Barometer("Barometer", 1 , aDrone);
+        _db.takeSensor(b);
 
 
 
         _sensorArray = _db.getSensors(aDrone);
+
+        Log.d("error check", String.valueOf(_sensorArray[0]==null));
 
         Log.d("SW sensorArray has this many: ", String.valueOf(_sensorArray.length));
 
@@ -108,19 +115,27 @@ public class SensorWrangler extends Service{
     public void pollSensor(){
         String date = new Date().toString();
 
+
+        Log.d("SensorArray special DEBUG @!@!@!@!@!",String.valueOf(_sensorArray==null));
         int sID = 0;
         HashMap sensorNames = new HashMap();
-        for(Sensible s : _sensorArray){
+        HashMap sensorDta = new HashMap();
+        //for(Sensible s : _sensorArray){
+        for (int j = 0; j < _sensorArray.length; j++){
+            Sensible s = _sensorArray[j];
             date = new Date().toString();
             _name = s.getName();
             _data = s.takeMeasurement();
             sID = s.getID();
 
-            sensorNames.put(sID, _name);
+            Log.d("hash ID", String.valueOf(sID));
+
+            sensorDta.put(String.valueOf(sID), _data);
+            sensorNames.put(String.valueOf(sID), _name);
         }
 
         _sensorData.putSerializable("names", sensorNames);
-        //_sensorData.putSerializable("datas", sensorData);
+        _sensorData.putSerializable("datas", sensorDta);
         _db.takeData(new DataPoint(sID, String.valueOf(_data), date));
         Log.d(String.format("SW: pollS: %s --", _name), String.valueOf(_data));
 
@@ -135,6 +150,14 @@ public class SensorWrangler extends Service{
         _intent.putExtras(_sensorData);
         sendBroadcast(_intent);
     }
-
+    public static void sleep(int amt) // In milliseconds
+    {
+        long a = System.currentTimeMillis();
+        long b = System.currentTimeMillis();
+        while ((b - a) <= amt)
+        {
+            b = System.currentTimeMillis();
+        }
+    }
 
 }

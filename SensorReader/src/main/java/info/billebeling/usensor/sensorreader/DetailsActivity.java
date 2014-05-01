@@ -6,12 +6,20 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 public class DetailsActivity extends ActionBarActivity {
+
+    private String _sID;
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -24,6 +32,8 @@ public class DetailsActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
+        Intent callingIntent = this.getIntent();
+        _sID = callingIntent.getStringExtra("id");
     }
 
     public void onResume(){
@@ -55,14 +65,34 @@ public class DetailsActivity extends ActionBarActivity {
         return id == R.id.action_settings || super.onOptionsItemSelected(item);
     }
     public void updateUI(Intent i){
+        Bundle b = i.getExtras();
+        Log.d("sID received from calling intent", String.valueOf(!(_sID==null)));
 
-        String name = i.getStringExtra("name");
-        TextView label = (TextView) findViewById(R.id.sensorLabel);
-        label.setText(name);
+        HashMap sensorData = (HashMap) b.getSerializable("datas");
+        HashMap sensorName = (HashMap) b.getSerializable("names");
+        Set sData = sensorData.entrySet();
+        Set sNames = sensorName.entrySet();
+        Iterator diter = sData.iterator();
+        Iterator niter = sNames.iterator();
 
-        String data = i.getStringExtra("data");
-        TextView reading = (TextView) findViewById(R.id.sensorReading);
-        reading.setText(data);
+        while (diter.hasNext()) {
+            Map.Entry dataMap = (Map.Entry) diter.next();
+            Map.Entry nameMap = (Map.Entry) niter.next();
+
+            Log.d(String.valueOf(dataMap.getKey()), String.valueOf(dataMap.getValue()));
+
+            if(_sID.equals(dataMap.getKey())) {
+
+                TextView label = (TextView) findViewById(R.id.sensorLabel);
+                label.setText(String.valueOf(nameMap.getValue()));
+
+                TextView reading = (TextView) findViewById(R.id.sensorReading);
+                reading.setText(String.valueOf(dataMap.getValue()));
+
+            }
+            diter.remove();
+            niter.remove();
+        }
 
     }
 }
